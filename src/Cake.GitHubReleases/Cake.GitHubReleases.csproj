@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Cake.Core" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="Cake.Common" Version="1.0.0" PrivateAssets="All" />    
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="package/*" />
+    <None Include="package/*" Pack="true" PackagePath="/" />
+  </ItemGroup>
+    
+  <PropertyGroup>
+    <PackageIconUrl>https://cdn.jsdelivr.net/gh/cake-contrib/graphics/png/addin/cake-contrib-addin-medium.png</PackageIconUrl>
+    <PackageIcon>cake-contrib-addin-medium.png</PackageIcon>
+    <!-- TODO: Add Package README -->
+    <!-- <PackageReadmeFile>README.md</PackageReadmeFile> -->
+  </PropertyGroup>
+	
+</Project>
