@@ -15,7 +15,7 @@ namespace Cake.GitHubReleases
             if (settings is null)
                 throw new ArgumentNullException(nameof(settings));
 
-            var releaseCreator = new GitHubReleaseCreator(context.Log, new GitHubClientFactory());
+            var releaseCreator = new GitHubReleaseCreator(context.Log, context.FileSystem, new GitHubClientFactory());
             return await releaseCreator.CreateRelease(settings);
         }
     }

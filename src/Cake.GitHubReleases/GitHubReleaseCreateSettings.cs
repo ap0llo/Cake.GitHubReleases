@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using Cake.Core.IO;
 
 namespace Cake.GitHubReleases
 {
@@ -40,6 +42,14 @@ namespace Cake.GitHubReleases
         /// Gets or sets whether to mark the release as "prerelease"
         /// </summary>
         public bool Prerelease { get; set; }
+
+        /// <summary>
+        /// Gets or sets the paths of the files to upload as release assets.
+        /// </summary>
+        public IList<FilePath> Assets { get; set; } = new List<FilePath>();
+
+
+        internal ICollection<FilePath> AssetsOrEmptyList => Assets ?? Array.Empty<FilePath>();
 
 
         /// <summary>
