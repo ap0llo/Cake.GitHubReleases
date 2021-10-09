@@ -49,7 +49,7 @@ namespace Cake.GitHubReleases
         public IList<FilePath> Assets { get; set; } = new List<FilePath>();
 
 
-        internal ICollection<FilePath> AssetsOrEmptyList => Assets ?? Array.Empty<FilePath>();
+        internal ICollection<FilePath> AssetsOrEmpty => Assets ?? Array.Empty<FilePath>();
 
 
         /// <summary>

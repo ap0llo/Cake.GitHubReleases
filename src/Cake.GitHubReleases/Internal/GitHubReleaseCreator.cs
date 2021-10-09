@@ -43,7 +43,7 @@ namespace Cake.GitHubReleases.Internal
         {
             var assetNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var filePath in settings.AssetsOrEmptyList)
+            foreach (var filePath in settings.AssetsOrEmpty)
             {
                 var file = m_FileSystem.GetFile(filePath);
 
@@ -77,7 +77,7 @@ namespace Cake.GitHubReleases.Internal
             //TODO: More logging
 
             // upload assets
-            foreach (var filePath in settings.AssetsOrEmptyList)
+            foreach (var filePath in settings.AssetsOrEmpty)
             {
                 using var stream = m_FileSystem.GetFile(filePath).OpenRead();
                 var assetUpload = new ReleaseAssetUpload()

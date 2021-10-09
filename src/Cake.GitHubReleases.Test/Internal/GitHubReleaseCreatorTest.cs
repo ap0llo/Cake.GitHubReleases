@@ -151,7 +151,7 @@ namespace Cake.GitHubReleases.Test.Internal
                 .Setup(x => x.UploadAsset(It.IsAny<Release>(), It.IsAny<ReleaseAssetUpload>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Release release, ReleaseAssetUpload assetUpload, CancellationToken _) => new TestReleaseAsset() { Name = assetUpload.FileName });
 
-            foreach (var filePath in settings.AssetsOrEmptyList)
+            foreach (var filePath in settings.AssetsOrEmpty)
             {
                 m_FileSystemMock
                     .Setup(x => x.GetFile(filePath))
