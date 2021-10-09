@@ -48,8 +48,18 @@ namespace Cake.GitHubReleases
         /// </summary>
         public IList<FilePath> Assets { get; set; } = new List<FilePath>();
 
+        /// <summary>
+        /// Gets or sets whether to replace an existing release
+        /// </summary>
+        /// <remarks>
+        /// When set to true, an existing release with the specified tag name will be deleted before a new release is created.
+        /// </remarks>
+        public bool Overwrite { get; set; }
+
 
         internal ICollection<FilePath> AssetsOrEmpty => Assets ?? Array.Empty<FilePath>();
+
+        internal string NameOrTagName => String.IsNullOrEmpty(Name) ? TagName : Name!;
 
 
         /// <summary>

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Cake.Core.Diagnostics;
 using Xunit.Abstractions;
 
@@ -28,7 +24,7 @@ namespace Cake.GitHubReleases.Test.Helpers
         /// <inheritdoc />
         public void Write(Verbosity verbosity, LogLevel level, string format, params object[] args)
         {
-            var message = $"{level} - {String.Format(format, args)}";
+            var message = $"{level.ToString().ToUpper(),-12} | {String.Format(format, args)}";
             m_TestOutputHelper.WriteLine(message);
         }
     }

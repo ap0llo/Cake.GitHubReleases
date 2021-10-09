@@ -21,30 +21,38 @@ namespace Cake.GitHubReleases.Test.Helpers
             }
         }
 
+        public class GitDatabaseClientMock
+        {
+            private readonly Mock<IGitDatabaseClient> m_Mock = new(MockBehavior.Strict);
+
+
+            public IGitDatabaseClient Object => m_Mock.Object;
+
+
+            public Mock<IReferencesClient> Reference { get; } = new(MockBehavior.Strict);
+
+
+            public GitDatabaseClientMock()
+            {
+                m_Mock.Setup(x => x.Reference).Returns(Reference.Object);
+            }
+        }
+
         private readonly Mock<IGitHubClient> m_Mock = new(MockBehavior.Strict);
 
 
         public IGitHubClient Object => m_Mock.Object;
 
-        public Mock<IIssuesClient> Issue { get; } = new(MockBehavior.Strict);
-
-        public Mock<IPullRequestsClient> PullRequest { get; } = new(MockBehavior.Strict);
-
-        public Mock<IMiscellaneousClient> Miscellaneous { get; } = new(MockBehavior.Strict);
 
         public RepositoriesClientMock Repository { get; } = new();
+
+        public GitDatabaseClientMock Git { get; } = new();
 
 
         public GitHubClientMock()
         {
-            Miscellaneous
-                .Setup(x => x.GetRateLimits())
-                .ReturnsAsync(new MiscellaneousRateLimit(new ResourceRateLimit(), new RateLimit()));
-
             m_Mock.Setup(x => x.Repository).Returns(Repository.Object);
-            m_Mock.Setup(x => x.Issue).Returns(Issue.Object);
-            m_Mock.Setup(x => x.PullRequest).Returns(PullRequest.Object);
-            m_Mock.Setup(x => x.Miscellaneous).Returns(Miscellaneous.Object);
+            m_Mock.Setup(x => x.Git).Returns(Git.Object);
         }
     }
 }

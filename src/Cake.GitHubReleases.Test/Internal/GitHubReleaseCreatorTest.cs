@@ -132,7 +132,7 @@ namespace Cake.GitHubReleases.Test.Internal
 
         }
 
-        
+
         [Theory]
         [MemberData(nameof(CreateReleaseTestCases))]
         public async Task CreateRelease_creates_the_expected_release(string id, GitHubReleaseCreateSettings settings, NewRelease expectedRelease, IReadOnlyList<ReleaseAssetUpload> expectedAssetUploads)
@@ -141,14 +141,22 @@ namespace Cake.GitHubReleases.Test.Internal
             _ = id;
             var sut = new GitHubReleaseCreator(m_TestLog, m_FileSystemMock.Object, m_ClientFactoryMock.Object);
 
-            var createdRelease = new TestRelease() { Id = 123 };
+            var createdRelease = new TestRelease() { Id = 123, TagName = settings.TagName };
 
             m_ClientMock.Repository.Release
-                .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<NewRelease>()))
+                .Setup(x => x.Get(settings.RepositoryOwner, settings.RepositoryName, It.IsAny<string>()))
+                .ThrowsNotFoundAsync();
+
+            m_ClientMock.Repository.Release
+                .Setup(x => x.GetAll(settings.RepositoryOwner, settings.RepositoryName))
+                .ReturnsEmptyListAsync();
+
+            m_ClientMock.Repository.Release
+                .Setup(x => x.Create(settings.RepositoryOwner, settings.RepositoryName, It.IsAny<NewRelease>()))
                 .ReturnsAsync(createdRelease);
 
             m_ClientMock.Repository.Release
-                .Setup(x => x.UploadAsset(It.IsAny<Release>(), It.IsAny<ReleaseAssetUpload>(), It.IsAny<CancellationToken>()))
+                .Setup(x => x.UploadAsset(createdRelease, It.IsAny<ReleaseAssetUpload>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Release release, ReleaseAssetUpload assetUpload, CancellationToken _) => new TestReleaseAsset() { Name = assetUpload.FileName });
 
             foreach (var filePath in settings.AssetsOrEmpty)
@@ -178,7 +186,7 @@ namespace Cake.GitHubReleases.Test.Internal
         }
 
         [Fact]
-        public async Task CreateRelease_fails_if_asset_to_upload_does_not_exis()
+        public async Task CreateRelease_fails_if_asset_to_upload_does_not_exist()
         {
             // ARRANGE
             var assetPath = new FilePath("does-not-exist");
@@ -244,8 +252,15 @@ namespace Cake.GitHubReleases.Test.Internal
             };
 
             m_ClientMock.Repository.Release
-                .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<NewRelease>()))
-                .ReturnsAsync(new TestRelease() { Id = 123 });
+                .Setup(x => x.Get(settings.RepositoryOwner, settings.RepositoryName, It.IsAny<string>()))
+                .ThrowsNotFoundAsync();
+            m_ClientMock.Repository.Release
+                .Setup(x => x.GetAll(settings.RepositoryOwner, settings.RepositoryName))
+                .ReturnsEmptyListAsync();
+
+            m_ClientMock.Repository.Release
+                .Setup(x => x.Create(settings.RepositoryOwner, settings.RepositoryName, It.IsAny<NewRelease>()))
+                .ReturnsAsync(new TestRelease() { Id = 123, TagName = settings.TagName });
 
             // ACT 
             _ = await sut.CreateRelease(settings);
@@ -267,8 +282,16 @@ namespace Cake.GitHubReleases.Test.Internal
             };
 
             m_ClientMock.Repository.Release
-                .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<NewRelease>()))
-                .ReturnsAsync(new TestRelease() { Id = 123 });
+                .Setup(x => x.Get(settings.RepositoryOwner, settings.RepositoryName, It.IsAny<string>()))
+                .ThrowsNotFoundAsync();
+
+            m_ClientMock.Repository.Release
+                .Setup(x => x.GetAll(settings.RepositoryOwner, settings.RepositoryName))
+                .ReturnsEmptyListAsync();
+
+            m_ClientMock.Repository.Release
+                .Setup(x => x.Create(settings.RepositoryOwner, settings.RepositoryName, It.IsAny<NewRelease>()))
+                .ReturnsAsync(new TestRelease() { Id = 123, TagName = settings.TagName });
 
             // ACT 
             _ = await sut.CreateRelease(settings);
@@ -276,6 +299,176 @@ namespace Cake.GitHubReleases.Test.Internal
             // ASSERT
             m_ClientFactoryMock.Verify(x => x.CreateClient(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
             m_ClientFactoryMock.Verify(x => x.CreateClient(settings.HostName, It.IsAny<string>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task CreateRelease_throws_ReleaseExistsException_if_a_release_with_the_specified_tag_name_already_exists()
+        {
+            // ARRANGE
+            var tagName = "tagName";
+            var sut = new GitHubReleaseCreator(m_TestLog, m_FileSystemMock.Object, m_ClientFactoryMock.Object);
+
+            var settings = new GitHubReleaseCreateSettings("owner", "repo", tagName);
+
+            m_ClientMock.Repository.Release
+                .Setup(x => x.Get(settings.RepositoryOwner, settings.RepositoryName, tagName))
+                .ReturnsAsync(new TestRelease() { Id = 123, TagName = tagName });
+
+            // ACT 
+            var ex = await Record.ExceptionAsync(async () => await sut.CreateRelease(settings));
+
+            // ASSERT
+            Assert.IsType<ReleaseExistsException>(ex);
+            m_ClientMock.Repository.Release.Verify(x => x.Create(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<NewRelease>()), Times.Never);
+            m_ClientMock.Repository.Release.Verify(x => x.Get(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            m_ClientMock.Repository.Release.Verify(x => x.Get(settings.RepositoryOwner, settings.RepositoryName, tagName), Times.Once);
+        }
+
+        [Fact]
+        public async Task CreateRelease_throws_ReleaseExistsException_if_a_draf_release_with_the_specified_tag_name_already_exists()
+        {
+            // ARRANGE
+            var tagName = "tagName";
+            var sut = new GitHubReleaseCreator(m_TestLog, m_FileSystemMock.Object, m_ClientFactoryMock.Object);
+
+            var settings = new GitHubReleaseCreateSettings("owner", "repo", tagName);
+
+            // draft releases cannot be retrieved by tag name but are included when using GetAll()
+            m_ClientMock.Repository.Release
+                .Setup(x => x.Get(settings.RepositoryOwner, settings.RepositoryName, tagName))
+                .ThrowsNotFoundAsync();
+
+            m_ClientMock.Repository.Release
+                .Setup(x => x.GetAll(settings.RepositoryOwner, settings.RepositoryName))
+                .ReturnsAsync(new[] { new TestRelease() { Id = 123, Draft = true, TagName = tagName } });
+
+            // ACT 
+            var ex = await Record.ExceptionAsync(async () => await sut.CreateRelease(settings));
+
+            // ASSERT
+            Assert.IsType<ReleaseExistsException>(ex);
+            m_ClientMock.Repository.Release.Verify(x => x.Create(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<NewRelease>()), Times.Never);
+            m_ClientMock.Repository.Release.Verify(x => x.Get(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            m_ClientMock.Repository.Release.Verify(x => x.Get(settings.RepositoryOwner, settings.RepositoryName, tagName), Times.Once);
+
+        }
+
+
+        [Fact]
+        public async Task CreateRelease_deletes_an_existing_release_with_the_same_tag_name_if_overwrite_is_set_to_true()
+        {
+            // ARRANGE
+            var tagName = "tagName";
+            var sut = new GitHubReleaseCreator(m_TestLog, m_FileSystemMock.Object, m_ClientFactoryMock.Object);
+
+            var settings = new GitHubReleaseCreateSettings("owner", "repo", tagName) { Overwrite = true };
+
+            var existingRelease = new TestRelease() { Id = 123, TagName = tagName };
+            var createdRelease = new TestRelease() { Id = 456, TagName = tagName };
+
+            m_ClientMock.Repository.Release
+                .Setup(x => x.Get(settings.RepositoryOwner, settings.RepositoryName, tagName))
+                .ReturnsAsync(existingRelease);
+
+            m_ClientMock.Repository.Release
+                .Setup(x => x.Delete(settings.RepositoryOwner, settings.RepositoryName, It.IsAny<int>()))
+                .ReturnsCompletedTask();
+
+            m_ClientMock.Repository.Release
+                .Setup(x => x.Create(settings.RepositoryOwner, settings.RepositoryName, It.IsAny<NewRelease>()))
+                .ReturnsAsync(createdRelease);
+
+            m_ClientMock.Git.Reference
+                .Setup(x => x.Delete(settings.RepositoryOwner, settings.RepositoryName, $"tags/{tagName}"))
+                .ReturnsCompletedTask();
+
+
+            // ACT 
+            var release = await sut.CreateRelease(settings);
+
+            // ASSERT
+            Assert.NotNull(release);
+            Assert.Equal(createdRelease.Id, release.Id);
+            m_ClientMock.Repository.Release.Verify(x => x.Delete(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()), Times.Once);
+            m_ClientMock.Repository.Release.Verify(x => x.Delete(settings.RepositoryOwner, settings.RepositoryName, existingRelease.Id), Times.Once);
+            m_ClientMock.Repository.Release.Verify(x => x.Create(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<NewRelease>()), Times.Once);
+            m_ClientMock.Repository.Release.Verify(x => x.Create(settings.RepositoryOwner, settings.RepositoryName, It.Is<NewRelease>(actual => actual.TagName == tagName)), Times.Once);
+            m_ClientMock.Git.Reference.Verify(x => x.Delete(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            m_ClientMock.Git.Reference.Verify(x => x.Delete(settings.RepositoryOwner, settings.RepositoryName, $"tags/{tagName}"), Times.Once);
+        }
+
+        [Fact]
+        public async Task CreateRelease_deletes_an_existing_draft_release_with_the_same_tag_name_if_overwrite_is_set_to_true()
+        {
+            // ARRANGE
+            var tagName = "tagName";
+            var sut = new GitHubReleaseCreator(m_TestLog, m_FileSystemMock.Object, m_ClientFactoryMock.Object);
+
+            var settings = new GitHubReleaseCreateSettings("owner", "repo", tagName) { Overwrite = true };
+
+            var existingRelease = new TestRelease() { Id = 123, Draft = true, TagName = tagName };
+            var createdRelease = new TestRelease() { Id = 456, TagName = tagName };
+
+            // Draft releases cannot be retrieved via the tag name but are returned by GetAll()
+            m_ClientMock.Repository.Release
+                .Setup(x => x.Get("owner", "repo", tagName))
+                .ThrowsNotFoundAsync();
+
+            m_ClientMock.Repository.Release
+                .Setup(x => x.GetAll("owner", "repo"))
+                .ReturnsAsync(new[] { existingRelease });
+
+            m_ClientMock.Repository.Release
+                .Setup(x => x.Delete(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()))
+                .ReturnsCompletedTask();
+
+            m_ClientMock.Repository.Release
+                .Setup(x => x.Create(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<NewRelease>()))
+                .ReturnsAsync(createdRelease);
+
+            m_ClientMock.Git.Reference
+                .Setup(x => x.Delete(settings.RepositoryOwner, settings.RepositoryName, It.IsAny<string>()))
+                .ThrowsAsync(new ApiValidationException());
+
+            // ACT 
+            var release = await sut.CreateRelease(settings);
+
+            // ASSERT
+            Assert.NotNull(release);
+            Assert.Equal(createdRelease.Id, release.Id);
+            m_ClientMock.Repository.Release.Verify(x => x.Delete("owner", "repo", existingRelease.Id));
+            m_ClientMock.Repository.Release.Verify(x => x.Create(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<NewRelease>()), Times.Once);
+            // for draft releases, there is no need to delete any tags
+            m_ClientMock.Git.Reference.Verify(x => x.Delete(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+
+        }
+
+        [Fact]
+        public async Task CreateRelease_throws_AmbiguousTagNameException_if_multiple_draft_releases_with_the_same_tag_name_exist()
+        {
+            // ARRANGE
+            var tagName = "tagName";
+            var sut = new GitHubReleaseCreator(m_TestLog, m_FileSystemMock.Object, m_ClientFactoryMock.Object);
+
+            var settings = new GitHubReleaseCreateSettings("owner", "repo", tagName) { Overwrite = true };
+
+            var existingRelease1 = new TestRelease() { Id = 123, Draft = true, TagName = tagName };
+            var existingRelease2 = new TestRelease() { Id = 456, Draft = true, TagName = tagName };
+
+            // Draft releases cannot be retrieved via the tag name but are returned by GetAll()
+            m_ClientMock.Repository.Release
+                .Setup(x => x.Get("owner", "repo", tagName))
+                .ThrowsNotFoundAsync();
+
+            m_ClientMock.Repository.Release
+                .Setup(x => x.GetAll("owner", "repo"))
+                .ReturnsAsync(new[] { existingRelease1, existingRelease2 });
+
+            // ACT 
+            var ex = await Record.ExceptionAsync(async () => await sut.CreateRelease(settings));
+
+            // ASSERT
+            Assert.IsType<AmbiguousTagNameException>(ex);
         }
 
 

@@ -7,8 +7,19 @@ namespace Cake.GitHubReleases.Test.Helpers
         public new int Id
         {
             get => base.Id;
-            set => base.Id = value;              
+            set => base.Id = value;
         }
 
+        public new bool Draft
+        {
+            get => base.Draft;
+            set => base.Draft = value;
+        }
+
+        public new string TagName
+        {
+            get => base.TagName;
+            set => base.TagName = value;
+        }
     }
 }

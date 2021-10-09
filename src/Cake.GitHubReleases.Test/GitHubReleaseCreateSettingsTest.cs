@@ -49,6 +49,7 @@ namespace Cake.GitHubReleases.Test
             Assert.Null(sut.Body);
             Assert.False(sut.Draft);
             Assert.False(sut.Prerelease);
+            Assert.False(sut.Overwrite);
             Assert.NotNull(sut.Assets);
             Assert.Empty(sut.Assets);
         }
