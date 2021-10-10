@@ -125,6 +125,8 @@ namespace Cake.GitHubReleases.Internal
             var createdRelease = await client.Repository.Release.Create(settings.RepositoryOwner, settings.RepositoryName, newRelease);
             m_CakeLog.Debug($"Created release with id '{createdRelease.Id}'");
 
+            var result = GitHubRelease.FromRelease(createdRelease);
+
             //
             // Upload assets
             //
@@ -142,17 +144,15 @@ namespace Cake.GitHubReleases.Internal
                         RawData = stream
                     };
                     var asset = await client.Repository.Release.UploadAsset(createdRelease, assetUpload);
+                    result.Add(GitHubReleaseAsset.FromReleaseAsset(asset));
                 }
-
-
             }
 
             m_CakeLog.Verbose(settings.AssetsOrEmpty.Count > 0
                 ? $"Successfully created new GitHub Release and uploaded '{settings.AssetsOrEmpty.Count}' assets"
                 : "Successfully created new GitHub Release");
 
-            //TODO: Include asset information in return value
-            return new GitHubRelease(createdRelease.Id);
+            return result;
         }
 
         private async Task<Release?> TryGetReleaseAsync(IGitHubClient client, GitHubReleaseCreateSettings settings)
