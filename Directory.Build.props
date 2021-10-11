@@ -35,7 +35,7 @@
 		<Authors>Andreas Gruenwald</Authors>
 		<PackageProjectUrl>https://github.com/ap0llo/Cake.GitHubReleases</PackageProjectUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<Description>A Cake addin for creating and reading GitHub releases</Description>
+		<Description>A Cake addin for creating GitHub Releases</Description>
 		<Copyright>Copyright (c) 2021, Andreas Gruenwald</Copyright>
 		<PackageTags>cake;build;cake-build;cake-addin;github</PackageTags>
 	</PropertyGroup>
