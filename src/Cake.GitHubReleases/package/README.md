@@ -52,10 +52,10 @@ To use the module in a Cake script file, perform the following steps:
             TargetCommitish = "abc123",
             
             // Set the GitHub access token to use for authentication
-            AccessToken = accessToken
+            AccessToken = accessToken,
 
             // Overwrite will delete any existing commit with the same tag name if it exists
-            Overwrite = false,
+            Overwrite = false
         };
 
         GitHubReleaseCreateAsync(settings);
