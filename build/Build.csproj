@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -14,6 +14,14 @@
     <PackageReference Include="Cake.BuildSystems.Module" Version="3.0.3" />
     <PackageReference Include="Cake.Frosting" Version="1.3.0" />
     <PackageReference Include="Cake.GitVersioning" Version="3.5.37-alpha" />
+    <PackageReference Include="Octokit" Version="0.50.0" />
   </ItemGroup>
-    
+
+  <ItemGroup>
+    <!-- Include the code for Cake.GitHubReleases (which is being built by this build project) so we can use it to create GitHub Releases-->
+    <Compile Include="..\src\Cake.GitHubReleases\**\*.cs" 
+             Link="Cake.GitHubReleases\%(RecursiveDir)%(FileName)%(Extension)"
+             Exclude="..\src\Cake.GitHubReleases\obj\**\*.cs;..\src\Cake.GitHubReleases\Properties\AssemblyInfo.cs"/>
+  </ItemGroup>
+  
 </Project>

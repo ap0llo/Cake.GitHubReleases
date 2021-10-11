@@ -1,5 +1,4 @@
 ﻿using Build.Tools.ChangeLog;
-using Cake.Common;
 using Cake.Common.Build;
 using Cake.Core.Diagnostics;
 using Cake.Frosting;
@@ -29,7 +28,7 @@ namespace Build.Tasks
                 Verbose = true
             };
 
-            if (context.EnvironmentVariable("GITHUB_ACCESSTOKEN") is string { Length: > 0 } accessToken)
+            if (context.TryGetGitHubAccessToken() is string accessToken)
             {
                 context.Log.Information("GitHub access token specified, activating changelog's GitHub integration");
                 changelogSettings.IntegrationProvider = ChangeLogIntegrationProvider.GitHub;

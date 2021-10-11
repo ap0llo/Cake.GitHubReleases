@@ -26,6 +26,14 @@ namespace Build
             public string ChangeLog => "TestResults";
         }
 
+        public class GitHubProjectInformation
+        {
+            //TODO: Determine from git url or similar
+            public string RepositoryOwner => "ap0llo";
+
+            public string RepositoryName => "Cake.GitHubReleases";
+        }
+
         /// <summary>
         /// Gets the names of the Artifacts to publish (when running in Azure DevOps)
         /// </summary>
@@ -82,6 +90,11 @@ namespace Build
 
         public FilePath ChangeLogOutputPath { get; }
 
+        public GitHubProjectInformation GitHubProject { get; } = new();
+
+        public string SourceVersion { get; }
+
+
 
         public BuildContext(ICakeContext context) : base(context)
         {
@@ -98,6 +111,7 @@ namespace Build
             ChangeLogOutputPath = BinariesDirectory.CombineWithFilePath("changelog.md");
 
             GitBranchName = GetGitBranchName();
+            SourceVersion = GetSourceVersion();
         }
 
 
@@ -106,6 +120,20 @@ namespace Build
         {
             TreatAllWarningsAs = MSBuildTreatAllWarningsAs.Error
         };
+
+
+
+        public string? TryGetGitHubAccessToken()
+        {
+            if (this.EnvironmentVariable("GITHUB_ACCESSTOKEN") is string { Length: > 0 } accessToken)
+            {
+                return accessToken;
+            }
+            else
+            {
+                return null;
+            }
+        }
 
 
         private string GetGitBranchName()
@@ -128,6 +156,23 @@ namespace Build
             }
 
             return branchName;
+        }
+
+        private string GetSourceVersion()
+        {
+            string sourceVersion;
+            if (this.IsRunningOnAzurePipelines())
+            {
+                sourceVersion = this.AzurePipelines().Environment.Repository.SourceVersion;
+            }
+
+            else
+            {
+                var gitContext = Nerdbank.GitVersioning.GitContext.Create(RootDirectory.FullPath);
+                sourceVersion = gitContext.GitCommitId!;
+            }
+
+            return sourceVersion;
         }
     }
 }

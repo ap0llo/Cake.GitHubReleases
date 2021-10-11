@@ -10,6 +10,7 @@ namespace Build.Tasks
     [IsDependentOn(typeof(PackTask))]
     [IsDependentOn(typeof(GenerateChangeLogTask))]
     [IsDependentOn(typeof(PushTask))]
+    [IsDependentOn(typeof(CreateGitHubReleaseTask))]
     public class CITask : FrostingTask
     { }
 }
