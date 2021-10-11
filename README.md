@@ -44,7 +44,7 @@ To use the module in a Cake script file, perform the following steps
             tagName: "v1.2.3")
         {
             // Set the name of the release (defaults to the tag name when not specified)
-            Name = $"v{version}",
+            Name = $"v1.2.3",
             
             // The release's description as Markdown string (optional)
             Body = "Description",

@@ -18,8 +18,7 @@
   <PropertyGroup>
     <PackageIconUrl>https://cdn.jsdelivr.net/gh/cake-contrib/graphics/png/addin/cake-contrib-addin-medium.png</PackageIconUrl>
     <PackageIcon>cake-contrib-addin-medium.png</PackageIcon>
-    <!-- TODO: Add Package README -->
-    <!-- <PackageReadmeFile>README.md</PackageReadmeFile> -->
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 	
 </Project>
