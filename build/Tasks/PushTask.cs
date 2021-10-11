@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Cake.Common;
 using Cake.Common.Tools.DotNetCore;
 using Cake.Common.Tools.DotNetCore.NuGet.Push;
@@ -23,25 +24,20 @@ namespace Build.Tasks
             var packages = context.FileSystem.GetFilePaths(context.PackageOutputPath, "*.nupkg", SearchScope.Current);
             context.Log.Information($"Found {packages.Count} packages in the package output directory '{context.PackageOutputPath}'");
 
-            ConfigureNuGetCredentials(context);
+            //
+            // NuGet push (CI Feed)
+            //
+            PushToAzureArtifacts(context, packages);
 
-            //
-            // NuGet push
-            //
-            foreach (var package in packages)
+            // NuGet push (nuget.org)
+            if (context.IsReleaseBranch)
             {
-                var pushSettings = new DotNetCoreNuGetPushSettings()
-                {
-                    Source = "AzureArtifacts",
-                    ApiKey = "AzureArtifacts"
-                };
-
-                context.DotNetCoreNuGetPush(package.FullPath, pushSettings);
+                PushToNuGetOrg(context, packages);
             }
         }
 
 
-        private void ConfigureNuGetCredentials(BuildContext context)
+        private void PushToAzureArtifacts(BuildContext context, IEnumerable<FilePath> packages)
         {
             // See https://www.daveaglick.com/posts/pushing-packages-from-azure-pipelines-to-azure-artifacts-using-cake
             var accessToken = context.EnvironmentVariable("SYSTEM_ACCESSTOKEN");
@@ -58,6 +54,39 @@ namespace Build.Tasks
                     UserName = "AzureArtifacts",
                     Password = accessToken
                 });
+
+            context.Log.Information($"Pushing packages to Azure Artifacts feed '{context.CINuGetFeedUrl}'");
+            foreach (var package in packages)
+            {
+                var pushSettings = new DotNetCoreNuGetPushSettings()
+                {
+                    Source = "AzureArtifacts",
+                    ApiKey = "AzureArtifacts"
+                };
+
+                context.DotNetCoreNuGetPush(package.FullPath, pushSettings);
+            }
+        }
+
+        private void PushToNuGetOrg(BuildContext context, IEnumerable<FilePath> packages)
+        {
+            var apiKey = context.EnvironmentVariable("NUGET_ORG_APIKEY");
+            if (String.IsNullOrEmpty(apiKey))
+            {
+                throw new InvalidOperationException("Could not determine nuget.org API key. Enviornment variable 'NUGET_ORG_APIKEY' is empty.");
+            }
+
+            context.Log.Information($"Pushing packages to nuget.org (feed {context.NuGetOrgFeedUrl})");
+            foreach (var package in packages)
+            {
+                var pushSettings = new DotNetCoreNuGetPushSettings()
+                {
+                    Source = context.NuGetOrgFeedUrl,
+                    ApiKey = apiKey
+                };
+
+                context.DotNetCoreNuGetPush(package.FullPath, pushSettings);
+            }
         }
     }
 }

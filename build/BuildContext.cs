@@ -82,6 +82,8 @@ namespace Build
 
         public string CINuGetFeedUrl => "https://pkgs.dev.azure.com/ap0llo/OSS/_packaging/Cake.GitHubReleases/nuget/v3/index.json";
 
+        public string NuGetOrgFeedUrl => "https://api.nuget.org/v3/index.json";
+
         public string GitBranchName { get; }
 
         public bool IsMasterBranch => GitBranchName.Equals("master", StringComparison.OrdinalIgnoreCase);
