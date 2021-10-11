@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using Cake.Common.Build;
+using Cake.Core;
+using Cake.Core.IO;
 
 namespace Build
 {
@@ -12,47 +15,30 @@ namespace Build
         {
             get
             {
-                string branchName;
                 if (m_Context.AzurePipelines.IsActive)
                 {
-                    branchName = m_Context.AzurePipelines().Environment.Repository.SourceBranch;
-                }
+                    var branchName = m_Context.AzurePipelines().Environment.Repository.SourceBranch;
 
+                    if (branchName.StartsWith("refs/heads/"))
+                    {
+                        branchName = branchName["refs/heads/".Length..];
+                    }
+
+                    return branchName;
+                }
                 else
                 {
-                    //TODO: Make this independent of Nerdbank.GitVersioning
-                    var gitContext = Nerdbank.GitVersioning.GitContext.Create(m_Context.RootDirectory.FullPath);
-                    branchName = gitContext.HeadCanonicalName!;
+                    return StartGit("rev-parse", "--abbrev-ref", "HEAD").Trim();
                 }
 
-                if (branchName.StartsWith("refs/heads/"))
-                {
-                    branchName = branchName["refs/heads/".Length..];
-                }
-
-                return branchName;
             }
         }
 
-        public string CommitId
-        {
-            get
-            {
-                string commitId;
-                if (m_Context.AzurePipelines.IsActive)
-                {
-                    commitId = m_Context.AzurePipelines().Environment.Repository.SourceVersion;
-                }
+        public string CommitId => m_Context.AzurePipelines.IsActive
+            ? m_Context.AzurePipelines().Environment.Repository.SourceVersion
+            : StartGit("rev-parse", "HEAD").Trim();
 
-                else
-                {
-                    var gitContext = Nerdbank.GitVersioning.GitContext.Create(m_Context.RootDirectory.FullPath);
-                    commitId = gitContext.GitCommitId!;
-                }
-
-                return commitId;
-            }
-        }
+        public string RemoteUrl => StartGit("remote", "get-url", "origin").Trim();
 
         public bool IsMasterBranch => BranchName.Equals("master", StringComparison.OrdinalIgnoreCase);
 
@@ -63,6 +49,25 @@ namespace Build
         {
             m_Context = context ?? throw new ArgumentNullException(nameof(context));
 
+        }
+
+
+        private string StartGit(params string[] args)
+        {
+            var process = m_Context.ProcessRunner.Start("git", new ProcessSettings()
+            {
+                Arguments = ProcessArgumentBuilder.FromStrings(args),
+                RedirectStandardOutput = true
+            });
+
+            process.WaitForExit();
+
+            var exitCode = process.GetExitCode();
+            if (exitCode != 0)
+                throw new Exception($"Command 'git {String.Join(" ", args)}' completed with exit code {exitCode}");
+
+            var stdOut = String.Join(Environment.NewLine, process.GetStandardOutput());
+            return stdOut;
         }
     }
 }
