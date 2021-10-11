@@ -23,7 +23,7 @@ namespace Build
             /// </summary>
             public string TestResults => "TestResults";
 
-            public string ChangeLog => "TestResults";
+            public string ChangeLog => "ChangeLog";
         }
 
         public class GitHubProjectInformation
