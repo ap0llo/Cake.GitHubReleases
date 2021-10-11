@@ -23,12 +23,12 @@ namespace Build.Tasks
                 RepositoryPath = context.RootDirectory,
                 CurrentVersion = version,
                 VersionRange = $"[{version}]",
-                OutputPath = context.ChangeLogOutputPath,
+                OutputPath = context.Output.ChangeLogFile,
                 Template = ChangeLogTemplate.GitHubRelease,
                 Verbose = true
             };
 
-            if (context.TryGetGitHubAccessToken() is string accessToken)
+            if (context.GitHub.TryGetAccessToken() is string accessToken)
             {
                 context.Log.Information("GitHub access token specified, activating changelog's GitHub integration");
                 changelogSettings.IntegrationProvider = ChangeLogIntegrationProvider.GitHub;
@@ -44,10 +44,10 @@ namespace Build.Tasks
             //
             // Publish changelog as pipeline artifact
             //
-            if (context.IsRunningOnAzurePipelines())
+            if (context.AzurePipelines.IsActive)
             {
                 context.Log.Information("Publishing change log to Azure Pipelines");
-                context.AzurePipelines().Commands.UploadArtifact("", context.ChangeLogOutputPath, context.ArtifactNames.ChangeLog);
+                context.AzurePipelines().Commands.UploadArtifact("", context.Output.ChangeLogFile, context.AzurePipelines.ArtifactNames.ChangeLog);
             }
         }
     }

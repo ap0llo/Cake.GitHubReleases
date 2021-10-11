@@ -13,7 +13,7 @@ namespace Build.Tasks
     {
         public override bool ShouldRun(BuildContext context)
         {
-            return context.IsRunningInCI && (context.IsMasterBranch || context.IsReleaseBranch);
+            return context.IsRunningInCI && (context.Git.IsMasterBranch || context.Git.IsReleaseBranch);
         }
 
         public override async Task RunAsync(BuildContext context)
@@ -22,9 +22,9 @@ namespace Build.Tasks
 
             var versionInfo = context.GitVersioningGetVersion(context.RootDirectory.FullPath);
 
-            var changeLog = context.FileSystem.GetFile(context.ChangeLogOutputPath).ReadAllText();
+            var changeLog = context.FileSystem.GetFile(context.Output.ChangeLogFile).ReadAllText();
 
-            if (context.TryGetGitHubAccessToken() is not string accessToken)
+            if (context.GitHub.TryGetAccessToken() is not string accessToken)
             {
                 throw new Exception("No GitHub access token specified. Cannot create a GitHub Release");
             }
@@ -32,7 +32,7 @@ namespace Build.Tasks
             //
             // For builds on master, create a *draft* release
             //
-            if (context.IsMasterBranch)
+            if (context.Git.IsMasterBranch)
             {
                 await CreateDraftRelease(context, accessToken, versionInfo.NuGetPackageVersion, changeLog);
             }
@@ -40,7 +40,7 @@ namespace Build.Tasks
             //
             // For builds on release branches, create a non-draft release
             //
-            if (context.IsReleaseBranch)
+            if (context.Git.IsReleaseBranch)
             {
                 await CreateRelease(context, accessToken, versionInfo.NuGetPackageVersion, changeLog);
             }
@@ -49,14 +49,14 @@ namespace Build.Tasks
 
         private async Task CreateDraftRelease(BuildContext context, string accessToken, string version, string changeLog)
         {
-            var releaseSettings = new GitHubReleaseCreateSettings(context.GitHubProject.RepositoryOwner, context.GitHubProject.RepositoryName, "vNext")
+            var releaseSettings = new GitHubReleaseCreateSettings(context.GitHub.RepositoryOwner, context.GitHub.RepositoryName, "vNext")
             {
                 Draft = true,
                 Prerelease = true,
                 Name = $"v{version}",
                 Body = changeLog,
                 Overwrite = true,
-                TargetCommitish = context.SourceVersion,
+                TargetCommitish = context.Git.CommitId,
                 AccessToken = accessToken
             };
 
@@ -65,11 +65,11 @@ namespace Build.Tasks
 
         private async Task CreateRelease(BuildContext context, string accessToken, string version, string changeLog)
         {
-            var releaseSettings = new GitHubReleaseCreateSettings(context.GitHubProject.RepositoryOwner, context.GitHubProject.RepositoryName, $"v{version}")
+            var releaseSettings = new GitHubReleaseCreateSettings(context.GitHub.RepositoryOwner, context.GitHub.RepositoryName, $"v{version}")
             {
                 Name = $"v{version}",
                 Body = changeLog,
-                TargetCommitish = context.SourceVersion,
+                TargetCommitish = context.Git.CommitId,
                 AccessToken = accessToken
             };
 

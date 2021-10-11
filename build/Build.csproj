@@ -19,9 +19,7 @@
 
   <ItemGroup>
     <!-- Include the code for Cake.GitHubReleases (which is being built by this build project) so we can use it to create GitHub Releases-->
-    <Compile Include="..\src\Cake.GitHubReleases\**\*.cs" 
-             Link="Cake.GitHubReleases\%(RecursiveDir)%(FileName)%(Extension)"
-             Exclude="..\src\Cake.GitHubReleases\obj\**\*.cs;..\src\Cake.GitHubReleases\Properties\AssemblyInfo.cs"/>
+    <Compile Include="..\src\Cake.GitHubReleases\**\*.cs" Link="Cake.GitHubReleases\%(RecursiveDir)%(FileName)%(Extension)" Exclude="..\src\Cake.GitHubReleases\obj\**\*.cs;..\src\Cake.GitHubReleases\Properties\AssemblyInfo.cs" />
   </ItemGroup>
   
 </Project>
