@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Cake.Core.Diagnostics;
 using Cake.Frosting;
@@ -70,7 +71,8 @@ namespace Build.Tasks
                 Name = $"v{version}",
                 Body = changeLog,
                 TargetCommitish = context.Git.CommitId,
-                AccessToken = accessToken
+                AccessToken = accessToken,
+                Assets = context.Output.PackageFiles.ToList()
             };
 
             await context.GitHubReleaseCreateAsync(releaseSettings);

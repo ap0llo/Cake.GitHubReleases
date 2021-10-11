@@ -47,7 +47,7 @@ namespace Build.Tasks
             if (context.AzurePipelines.IsActive)
             {
                 context.Log.Information("Publishing NuGet packages to Azure Pipelines");
-                foreach (var file in context.FileSystem.GetFilePaths(context.Output.PackagesDirectory, "*.nupkg"))
+                foreach (var file in context.Output.PackageFiles)
                 {
                     context.Log.Debug("Publishing '{file}'");
                     context.AzurePipelines().Commands.UploadArtifact("", file, context.AzurePipelines.ArtifactNames.Binaries);

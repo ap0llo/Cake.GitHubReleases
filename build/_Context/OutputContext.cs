@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Cake.Common;
 using Cake.Core.IO;
 
@@ -29,6 +30,8 @@ namespace Build
         public DirectoryPath TestResultsDirectory => BinariesDirectory.Combine(m_Context.BuildSettings.Configuration).Combine("TestResults");
 
         public FilePath ChangeLogFile => BinariesDirectory.CombineWithFilePath("changelog.md");
+
+        public IEnumerable<FilePath> PackageFiles => m_Context.FileSystem.GetFilePaths(PackagesDirectory, "*.nupkg");
 
 
         public OutputContext(BuildContext context)

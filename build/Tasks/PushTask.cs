@@ -22,20 +22,17 @@ namespace Build.Tasks
 
         public override void Run(BuildContext context)
         {
-            var packages = context.FileSystem.GetFilePaths(context.Output.PackagesDirectory, "*.nupkg", SearchScope.Current);
-            context.Log.Information($"Found {packages.Count} packages in the package output directory '{context.Output.PackagesDirectory}'");
-
             var activePushTargets = context.PushTargets.Where(x => x.IsActive(context));
             foreach (var target in activePushTargets)
             {
                 switch (target.Type)
                 {
                     case PushTargetType.AzureArtifacts:
-                        PushToAzureArtifacts(context, target, packages);
+                        PushToAzureArtifacts(context, target);
                         break;
 
                     case PushTargetType.NuGetOrg:
-                        PushToNuGetOrg(context, target, packages);
+                        PushToNuGetOrg(context, target);
                         break;
 
                     default:
@@ -45,7 +42,7 @@ namespace Build.Tasks
         }
 
 
-        private void PushToAzureArtifacts(BuildContext context, PushTarget pushTarget, IEnumerable<FilePath> packages)
+        private void PushToAzureArtifacts(BuildContext context, PushTarget pushTarget)
         {
             // See https://www.daveaglick.com/posts/pushing-packages-from-azure-pipelines-to-azure-artifacts-using-cake
             var accessToken = context.EnvironmentVariable("SYSTEM_ACCESSTOKEN");
@@ -64,8 +61,9 @@ namespace Build.Tasks
                 });
 
             context.Log.Information($"Pushing packages to Azure Artifacts feed '{pushTarget.FeedUrl}'");
-            foreach (var package in packages)
+            foreach (var package in context.Output.PackageFiles)
             {
+                context.Log.Information($"Pushing package '{package}'");
                 var pushSettings = new DotNetCoreNuGetPushSettings()
                 {
                     Source = "AzureArtifacts",
@@ -76,7 +74,7 @@ namespace Build.Tasks
             }
         }
 
-        private void PushToNuGetOrg(BuildContext context, PushTarget pushTarget, IEnumerable<FilePath> packages)
+        private void PushToNuGetOrg(BuildContext context, PushTarget pushTarget)
         {
             var apiKey = context.EnvironmentVariable("NUGET_ORG_APIKEY");
             if (String.IsNullOrEmpty(apiKey))
@@ -85,8 +83,9 @@ namespace Build.Tasks
             }
 
             context.Log.Information($"Pushing packages to nuget.org (feed {pushTarget.FeedUrl})");
-            foreach (var package in packages)
+            foreach (var package in context.Output.PackageFiles)
             {
+                context.Log.Information($"Pushing package '{package}'");
                 var pushSettings = new DotNetCoreNuGetPushSettings()
                 {
                     Source = pushTarget.FeedUrl,
