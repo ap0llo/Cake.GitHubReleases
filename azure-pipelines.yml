@@ -20,3 +20,4 @@ jobs:
     env:
      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
      GITHUB_ACCESSTOKEN: $(GitHub.AccessToken)
+     DOTNET_SKIP_FIRST_TIME_EXPERIENCE : "true"
