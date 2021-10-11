@@ -1,0 +1,22 @@
+trigger:
+  - master
+  - release/*
+
+variables:
+  buildConfiguration: 'Release'
+
+jobs:
+- job: Build
+  displayName: Build
+  pool:
+    vmImage: 'windows-latest'
+
+  steps:
+  - task: PowerShell@2
+    displayName: Cake Build
+    inputs:
+      filePath: './build.ps1'
+      arguments: '--target CI --configuration $(buildConfiguration)'
+    env:
+     SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+     GITHUB_ACCESSTOKEN: $(GitHub.AccessToken)
