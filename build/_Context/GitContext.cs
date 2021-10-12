@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 using Cake.Common.Build;
-using Cake.Core;
+using Cake.Core.Diagnostics;
 using Cake.Core.IO;
 
 namespace Build
@@ -49,6 +48,18 @@ namespace Build
         {
             m_Context = context ?? throw new ArgumentNullException(nameof(context));
 
+        }
+
+
+        public void PrintToLog(int indentWidth = 0)
+        {
+            string prefix = new String(' ', indentWidth);
+
+            m_Context.Log.Information($"{prefix}{nameof(BranchName)}: {BranchName}");
+            m_Context.Log.Information($"{prefix}{nameof(CommitId)}: {CommitId}");
+            m_Context.Log.Information($"{prefix}{nameof(RemoteUrl)}: {RemoteUrl}");
+            m_Context.Log.Information($"{prefix}{nameof(IsMasterBranch)}: {IsMasterBranch}");
+            m_Context.Log.Information($"{prefix}{nameof(IsReleaseBranch)}: {IsReleaseBranch}");
         }
 
 
