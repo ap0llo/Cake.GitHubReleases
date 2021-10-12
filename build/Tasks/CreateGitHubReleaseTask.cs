@@ -58,6 +58,7 @@ namespace Build.Tasks
                 Body = changeLog,
                 Overwrite = true,
                 TargetCommitish = context.Git.CommitId,
+                HostName = context.GitHub.HostName,
                 AccessToken = accessToken
             };
 
@@ -72,6 +73,7 @@ namespace Build.Tasks
                 Body = changeLog,
                 TargetCommitish = context.Git.CommitId,
                 AccessToken = accessToken,
+                HostName = context.GitHub.HostName,
                 Assets = context.Output.PackageFiles.ToList()
             };
 
