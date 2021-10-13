@@ -1,0 +1,74 @@
+﻿[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Cake.GitHubReleases.Test")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("DynamicProxyGenAssembly2")]
+[assembly: System.Runtime.Versioning.TargetFramework(".NETStandard,Version=v2.0", FrameworkDisplayName="")]
+namespace Cake.GitHubReleases
+{
+    public class AmbiguousTagNameException : Cake.GitHubReleases.GitHubReleaseException
+    {
+        public AmbiguousTagNameException(string message) { }
+    }
+    public sealed class AssetConflictException : Cake.GitHubReleases.GitHubReleaseException
+    {
+        public AssetConflictException(string message) { }
+    }
+    public sealed class GitHubRelease
+    {
+        public GitHubRelease(int id, string htmlUrl, string tagName, string targetCommitish, string name, string body, bool draft, bool prerelease, System.DateTime createdAt, System.DateTime? publishedAt) { }
+        public System.Collections.Generic.IReadOnlyList<Cake.GitHubReleases.GitHubReleaseAsset> Assets { get; }
+        public string Body { get; }
+        public System.DateTime CreatedAt { get; }
+        public bool Draft { get; }
+        public string HtmlUrl { get; }
+        public int Id { get; }
+        public string Name { get; }
+        public bool Prerelease { get; }
+        public System.DateTime? PublishedAt { get; }
+        public string TagName { get; }
+        public string TargetCommitish { get; }
+    }
+    [Cake.Core.Annotations.CakeAliasCategory("GitHubRelease")]
+    public static class GitHubReleaseAliases
+    {
+        [Cake.Core.Annotations.CakeMethodAlias]
+        public static System.Threading.Tasks.Task<Cake.GitHubReleases.GitHubRelease> GitHubReleaseCreateAsync(this Cake.Core.ICakeContext context, Cake.GitHubReleases.GitHubReleaseCreateSettings settings) { }
+    }
+    public sealed class GitHubReleaseAsset
+    {
+        public GitHubReleaseAsset(int id, string name, long size, string contentType, string browserDownloadUrl) { }
+        public string BrowserDownloadUrl { get; }
+        public string ContentType { get; }
+        public int Id { get; }
+        public string Name { get; }
+        public long Size { get; }
+    }
+    public sealed class GitHubReleaseCreateSettings : Cake.GitHubReleases.GitHubSettings
+    {
+        public GitHubReleaseCreateSettings(string repositoryOwner, string repositoryName, string tagName) { }
+        public System.Collections.Generic.IList<Cake.Core.IO.FilePath> Assets { get; set; }
+        public string? Body { get; set; }
+        public bool Draft { get; set; }
+        public string? Name { get; set; }
+        public bool Overwrite { get; set; }
+        public bool Prerelease { get; set; }
+        public string TagName { get; }
+        public string? TargetCommitish { get; set; }
+    }
+    public abstract class GitHubReleaseException : System.Exception
+    {
+        protected GitHubReleaseException() { }
+        protected GitHubReleaseException(string message) { }
+        protected GitHubReleaseException(string message, System.Exception innerException) { }
+    }
+    public abstract class GitHubSettings
+    {
+        protected GitHubSettings(string repositoryOwner, string repositoryName) { }
+        public string? AccessToken { get; set; }
+        public string HostName { get; set; }
+        public string RepositoryName { get; set; }
+        public string RepositoryOwner { get; set; }
+    }
+    public class ReleaseExistsException : Cake.GitHubReleases.GitHubReleaseException
+    {
+        public ReleaseExistsException(string message) { }
+    }
+}

@@ -12,7 +12,7 @@ namespace System.Diagnostics.CodeAnalysis
 
     [ExcludeFromCodeCoverage]
     [AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
-    public sealed class NotNullWhenAttribute : Attribute
+    internal sealed class NotNullWhenAttribute : Attribute
     {
         public bool ReturnValue { get; }
 
