@@ -16,9 +16,9 @@ You can read the latest documentation at https://github.com/ap0llo/Cake.GitHubRe
 
 The addin currently provides a single Cake script alias `GitHubReleaseCreateAsync()`.
 
-To use the module in a Cake script file, perform the following steps:
+To use the addin in a Cake script file, perform the following steps:
 
-1. Add the preprocessor directive to install the module
+1. Add the preprocessor directive to install the addin
 
     ```cs
     #addin nuget:?package=Cake.GitHubReleases&version=VERSION
