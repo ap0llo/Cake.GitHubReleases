@@ -12,21 +12,9 @@ A [Cake](https://cakebuild.net/) Addin to create [GitHub Releases](https://docs.
 
 The addin currently provides a single Cake script alias `GitHubReleaseCreateAsync()`.
 
-To use the module in a Cake script file, perform the following steps
+To use the addin in a Cake script file, perform the following steps
 
-1. Add the [Azure Artifacts feed](https://www.nuget.org/packages/Cake.GitHubReleases) to your `nuget.config` (the module is not yet available on NuGet.org):
-
-    ```xml
-    <?xml version="1.0" encoding="utf-8"?>
-    <configuration>
-        <packageSources>
-        ...
-        <add key="Cake.GitHubReleases" value="https://pkgs.dev.azure.com/ap0llo/OSS/_packaging/Cake.GitHubReleases/nuget/v3/index.json" />
-    </packageSources>
-    </configuration>
-    ```
-
-1. Add the preprocessor directive to install the module
+1. Add the preprocessor directive to install the addin
 
     ```cs
     #addin nuget:?package=Cake.GitHubReleases&version=VERSION
