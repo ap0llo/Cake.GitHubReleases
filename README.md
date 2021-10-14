@@ -1,7 +1,7 @@
 # Cake.GitHubReleases
 
 [![NuGet](https://img.shields.io/nuget/v/Cake.GitHubReleases.svg?logo=nuget)](https://www.nuget.org/packages/Cake.GitHubReleases)
-[![Azure Artifacts](https://img.shields.io/badge/Azure%20Artifacts-prerelease-yellow.svg?logo=azuredevops)](https://dev.azure.com/ap0llo/OSS/_packaging?_a=feed&feed=Cake.GitHubReleases)
+[![Azure Artifacts](https://img.shields.io/badge/Azure%20Artifacts-prerelease-yellow.svg?logo=azuredevops)](https://dev.azure.com/ap0llo/OSS/_packaging?_a=feed&feed=PublicCI)
 
 [![Build Status](https://dev.azure.com/ap0llo/OSS/_apis/build/status/Cake.GitHubReleases?branchName=master)](https://dev.azure.com/ap0llo/OSS/_build/latest?definitionId=22&branchName=master)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-green.svg)](https://conventionalcommits.org)
