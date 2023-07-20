@@ -1,10 +1,12 @@
 # Cake.GitHubReleases
 
-[![NuGet](https://img.shields.io/nuget/v/Cake.GitHubReleases.svg?logo=nuget)](https://www.nuget.org/packages/Cake.GitHubReleases)
-[![Azure Artifacts](https://img.shields.io/badge/Azure%20Artifacts-prerelease-yellow.svg?logo=azuredevops)](https://dev.azure.com/ap0llo/OSS/_packaging?_a=feed&feed=PublicCI)
+---
 
-[![Build Status](https://dev.azure.com/ap0llo/OSS/_apis/build/status/Cake.GitHubReleases?branchName=master)](https://dev.azure.com/ap0llo/OSS/_build/latest?definitionId=22&branchName=master)
-[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-green.svg)](https://conventionalcommits.org)
+**This Repository is no longer maintained**
+
+**The functionality of this Cake Addin has been integrated into [Cake.GitHub](https://github.com/cake-contrib/Cake.GitHub)**
+
+---
 
 A [Cake](https://cakebuild.net/) Addin to create [GitHub Releases](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases) from a Cake Build.
 
